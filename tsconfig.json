@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "noEmit": true,
+    "checkJs": true,
+    "types": ["node"]
+  },
+  "include": ["*.js", "test/*.ts"]
+}

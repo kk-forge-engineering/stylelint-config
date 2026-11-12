@@ -1,0 +1,23 @@
+/* oxfmt keeps these blocks without the blank lines stylelint-config-standard asks for. */
+:root {
+  --page-gap: 1rem;
+  color: #333;
+  --page-width: 60rem;
+  /* oxfmt keeps a comment right after a declaration. */
+  background: #fff;
+}
+.card {
+  /*tight comment*/
+  margin: 0 auto;
+  .card-title {
+    font-weight: 600;
+  }
+  @media (width >= 600px) {
+    padding: var(--page-gap);
+  }
+}
+.drag-handle {
+  /* stylelint-disable-next-line property-no-vendor-prefix -- WebKit webviews still need the prefix */
+  -webkit-user-select: none;
+  user-select: none;
+}

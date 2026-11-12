@@ -1,0 +1,37 @@
+[tools]
+node = "26"
+
+[tasks.setup]
+description = "Install the npm packages"
+run = "npm ci"
+
+[tasks.check]
+description = "The gate before a commit: every linter and the test"
+depends = ["lint", "test"]
+
+[tasks."check:ci"]
+description = "check as CI runs it"
+depends = ["lint", "test:ci"]
+
+[tasks.lint]
+description = "Every linter: types, oxlint and format"
+run = "npm run lint"
+
+[tasks."lint:fix"]
+description = "Every linter's fix: oxlint and format"
+run = "npm run lint:fix"
+
+[tasks.test]
+description = "Lint the fixtures through the packed presets"
+run = "npm test"
+
+# test:ci runs the same test and writes no coverage, because the repo has no SonarQube project.
+[tasks."test:ci"]
+description = "test as CI runs it"
+run = "npm test"
+
+# The Release workflow packs in a job apart from the checks. This install runs no dependency's scripts, so none of
+# them runs where the tarball is made.
+[tasks.pack]
+description = "Pack the package into the repo root, as the Release workflow publishes it"
+run = ["npm ci --ignore-scripts", "npm pack"]

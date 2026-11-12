@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@source "../components";
+@custom-variant dark (&:where([data-theme="dark"] *));
+@theme {
+  --text-xs--line-height: 1.25;
+  --spacing-0\.5: 0.125rem;
+}
+@utility content-auto {
+  content-visibility: auto;
+}
+.button {
+  @apply px-2 py-1;
+}
+@theme {
+  --*: initial;
+  --color-*: initial;
+  --color-brand: oklch(70% 0.2 250deg);
+}
+@utility scrollbar-hidden {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+@custom-variant pointer-fine {
+  @media (pointer: fine) {
+    &:where(:hover) {
+      @slot;
+    }
+  }
+}
+.card {
+  margin: --spacing(4);
+  color: --alpha(var(--color-brand) / 50%);
+}

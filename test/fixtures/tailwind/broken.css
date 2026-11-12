@@ -1,0 +1,5 @@
+@import url("tailwindcss");
+@tailwnd utilities;
+@theme {
+  --Text-xs: 0.75rem;
+}

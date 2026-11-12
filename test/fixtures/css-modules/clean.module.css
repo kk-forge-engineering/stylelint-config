@@ -1,0 +1,6 @@
+.card {
+  composes: surfaceRaised from "./shared.module.css";
+}
+.card :global(.icon) {
+  width: 1rem;
+}

@@ -1,0 +1,30 @@
+.badge {
+  color: #ffffff;
+}
+.cardTitle {
+  margin: 0;
+}
+.panel {
+  color: #12345g;
+}
+.row {
+  padding: 0;
+  margin: 0;
+  padding: 1px;
+}
+.handle {
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-user-select: none;
+}
+.plain {
+  /* stylelint-disable-next-line color-named -- the config has no such rule */
+  color: red;
+}
+.quiet {
+  /* stylelint-disable-next-line color-hex-length -- nothing on the next line breaks it */
+  margin: 0;
+}
+/* stylelint-disable -- the whole rest of the file, which names no rule */
+.loud {
+  color: #ffffff;
+}
