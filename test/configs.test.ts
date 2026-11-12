@@ -75,6 +75,7 @@ await suite("presets", async () => {
       "declaration-block-no-duplicate-properties",
       "declaration-property-value-no-unknown",
       "selector-class-pattern",
+      "value-keyword-case",
     ]);
   });
 
@@ -83,6 +84,10 @@ await suite("presets", async () => {
       "property-no-unknown",
       "selector-pseudo-class-no-unknown",
     ]);
+    assert.deepEqual(
+      await reportedRules(["base", "css-modules"], "css-modules/broken.module.css"),
+      ["value-keyword-case"],
+    );
   });
 
   await test("tailwind still reports an unknown at-rule, a url() import and a custom property out of pattern", async () => {

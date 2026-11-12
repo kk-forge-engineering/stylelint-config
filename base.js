@@ -17,5 +17,8 @@ export default {
     "custom-property-empty-line-before": null,
     "declaration-empty-line-before": null,
     "rule-empty-line-before": null,
+    // The check skips custom properties, so a font list in one keeps its case.
+    // Chrome matches the font `BlinkMacSystemFont` only in this exact case.
+    "value-keyword-case": ["lower", { ignoreProperties: ["/^--/"] }],
   },
 };
