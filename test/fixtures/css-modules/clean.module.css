@@ -1,5 +1,6 @@
 .card {
   composes: surfaceRaised from "./shared.module.css";
+  --card-font: BlinkMacSystemFont, sans-serif;
 }
 .card :global(.icon) {
   width: 1rem;

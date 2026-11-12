@@ -1,6 +1,6 @@
 {
   "name": "@kk-forge/stylelint-config",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The stylelint rules KK Forge's CSS lints with",
   "license": "MIT",
   "author": "KK Forge",

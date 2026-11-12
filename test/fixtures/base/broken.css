@@ -1,5 +1,6 @@
 .badge {
   color: #ffffff;
+  display: BLOCK;
 }
 .cardTitle {
   margin: 0;

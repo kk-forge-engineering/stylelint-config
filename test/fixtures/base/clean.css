@@ -1,6 +1,7 @@
 /* oxfmt keeps these blocks without the blank lines stylelint-config-standard asks for. */
 :root {
   --page-gap: 1rem;
+  --sans: -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
   color: #333;
   --page-width: 60rem;
   /* oxfmt keeps a comment right after a declaration. */

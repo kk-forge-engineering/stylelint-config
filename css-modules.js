@@ -10,9 +10,10 @@ export default {
       rules: {
         "selector-pseudo-class-no-unknown": [true, { ignorePseudoClasses: ["global"] }],
         "property-no-unknown": [true, { ignoreProperties: ["composes"] }],
-        // This rule skips `composes`, because its values are class names.
-        // Class names are case-sensitive, so a lowered name matches no class.
-        "value-keyword-case": ["lower", { ignoreProperties: ["composes"] }],
+        // The rule skips `composes`, whose values are case-sensitive class names.
+        // The rule also skips custom properties, as `base.js` does.
+        // stylelint replaces the options of `base.js` with these, so this list repeats them.
+        "value-keyword-case": ["lower", { ignoreProperties: ["composes", "/^--/"] }],
       },
     },
   ],

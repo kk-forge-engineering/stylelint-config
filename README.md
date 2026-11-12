@@ -2,7 +2,7 @@
 
 Shared stylelint configs for KK Forge's CSS. oxfmt formats the CSS, so the configs hold no layout rules.
 
-- `base`: stylelint-config-standard without its blank-line and comment-spacing rules. A disable comment must name a rule the config has, give its reason after `--`, and silence a finding.
+- `base`: stylelint-config-standard without its blank-line and comment-spacing rules. Keywords in a custom property keep their case, so `--sans: BlinkMacSystemFont, sans-serif` passes. A disable comment must name a rule the config has, give its reason after `--`, and silence a finding.
 - `css-modules`: lets a file named `*.module.css` use `:global` and `composes`.
 - `tailwind`: Tailwind 4's at-rules, the `--alpha()` and `--spacing()` functions, `@import "tailwindcss"`, `&` directly inside `@utility` and `@custom-variant`, and theme variables such as `--text-xs--line-height` and `--color-*: initial`.
 
