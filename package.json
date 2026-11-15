@@ -11,6 +11,7 @@
   "files": [
     "base.js",
     "css-modules.js",
+    "custom-media.js",
     "tokens.js",
     "tailwind.js"
   ],

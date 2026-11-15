@@ -1,3 +1,11 @@
+import customMedia from "./custom-media.js";
+
+/** A token, `var(--name)`, or a token with a token as its fallback, `var(--name, var(--other))`. */
+const tokenOrFallback = "/^var\\(--[a-z0-9-]+(, *var\\(--[a-z0-9-]+\\))?\\)$/";
+
+/** Media features a theme or a layout must not ask: the color scheme and the window width. */
+const windowFeatures = ["prefers-color-scheme", "width", "min-width", "max-width"];
+
 /** @type {import("stylelint").Config["rules"]} */
 const valueRules = {
   // A font size or radius takes no unit at all, so no unit is left to slip past a list. A radius keeps `%`: `50%` is a
@@ -7,14 +15,46 @@ const valueRules = {
     "/radius$/": ["%"],
   },
   "declaration-property-value-allowed-list": {
-    "font-weight": ["/^var\\(--[a-z0-9-]+\\)$/", "inherit"],
+    // A fallback is held to the same rule: a token, never a number, so `var(--fw, 600)` is reported and
+    // `var(--fw, var(--fw-strong))` passes. One level of fallback; a deeper chain is spelled as its own token.
+    "font-weight": [tokenOrFallback, "inherit"],
     // `1` is a glyph or badge with no leading, not a step of the scale.
-    "line-height": ["/^var\\(--[a-z0-9-]+\\)$/", "1", "normal", "inherit"],
+    "line-height": [tokenOrFallback, "1", "normal", "inherit"],
     // `font` sets size, weight and line height past the checks on each of them, so it may only reset them.
     font: ["inherit"],
   },
   "color-no-hex": true,
-  "color-named": "never",
+  // A property that names something (a container, a counter, a timeline, a view transition) takes an identifier, and
+  // `tan` or `navy` there is a name, not a color. Animations, fonts, grid areas and list styles stylelint skips itself.
+  "color-named": [
+    "never",
+    {
+      ignoreProperties: [
+        "anchor-name",
+        "container",
+        "container-name",
+        "content",
+        "counter-reset",
+        "counter-set",
+        "grid",
+        "grid-column-end",
+        "grid-column-start",
+        "grid-row-end",
+        "grid-row-start",
+        "grid-template",
+        "grid-template-areas",
+        "page",
+        "position-anchor",
+        "scroll-timeline",
+        "scroll-timeline-name",
+        "timeline-scope",
+        "view-timeline",
+        "view-timeline-name",
+        "view-transition-class",
+        "view-transition-name",
+      ],
+    },
+  ],
   "function-disallowed-list": [
     "rgb",
     "rgba",
@@ -36,15 +76,13 @@ const valueRules = {
  * @type {import("stylelint").Config}
  */
 export default {
+  plugins: [customMedia],
   rules: {
     ...valueRules,
-    // The tokens file is held to this one too: a second palette would be written exactly there.
-    "media-feature-name-disallowed-list": [
-      "prefers-color-scheme",
-      "width",
-      "min-width",
-      "max-width",
-    ],
+    // The tokens file is held to these too: a second palette would be written exactly there. `@custom-media` is
+    // checked as well, or a banned query could be named once there and used as `@media (--name)`.
+    "media-feature-name-disallowed-list": windowFeatures,
+    "kk-forge/custom-media-feature-name-disallowed-list": windowFeatures,
   },
   overrides: [
     {

@@ -29,6 +29,8 @@ symlinkSync(
   join(root, "node_modules", "stylelint-config-standard"),
   join(consumer, "node_modules", "stylelint-config-standard"),
 );
+// stylelint is a peer dependency, which a consumer installs itself. The tokens plugin imports it.
+symlinkSync(join(root, "node_modules", "stylelint"), join(consumer, "node_modules", "stylelint"));
 // stylelint resolves `extends` from the working directory. In this repo the
 // package's own name resolves to its source. The test works from the consumer
 // so that stylelint reads only the unpacked tarball.
@@ -122,6 +124,12 @@ await suite("presets", async () => {
       "border-radius: 4px": "declaration-property-unit-allowed-list",
       "border-radius: 1em": "declaration-property-unit-allowed-list",
       "font-weight: 600": "declaration-property-value-allowed-list",
+      "font-weight: var(--fw, 600)": "declaration-property-value-allowed-list",
+      "line-height: var(--lh, 1.4)": "declaration-property-value-allowed-list",
+      "font-size: var(--fs, 13px)": "declaration-property-unit-allowed-list",
+      "color: var(--text, #fff)": "color-no-hex",
+      "color: var(--text, white)": "color-named",
+      "--accent: white": "color-named",
       "line-height: 1.4": "declaration-property-value-allowed-list",
       "line-height: 20px": "declaration-property-value-allowed-list",
       "font: 600 14px/20px var(--sans)": "declaration-property-value-allowed-list",
@@ -157,6 +165,45 @@ await suite("presets", async () => {
       });
       assert.ok(inTokens.includes("media-feature-name-disallowed-list"), `${media} in tokens.css`);
     }
+    // A banned query named once in @custom-media would otherwise reach @media (--name) unseen.
+    for (const query of [
+      "(max-width: 600px)",
+      "(prefers-color-scheme: dark)",
+      "screen and (width <= 600px)",
+    ]) {
+      const css = `@custom-media --narrow ${query};\n`;
+      assert.ok(
+        (await reportedOn(css)).includes("kk-forge/custom-media-feature-name-disallowed-list"),
+        `@custom-media ${query}`,
+      );
+    }
+    // Case, a comment in the params and two banned features in one query: one report each time.
+    for (const css of [
+      "@CUSTOM-MEDIA --narrow (max-width: 600px);\n",
+      "@custom-media --narrow /* phone */ (max-width: 600px);\n",
+      "@custom-media --narrow (min-width: 1px) and (prefers-color-scheme: dark);\n",
+    ]) {
+      const { results } = await stylelint.lint({
+        config: { extends: ["@kk-forge/stylelint-config/tokens"] },
+        code: css,
+        codeFilename: join(consumer, "src", "panel.css"),
+      });
+      const rules = results.flatMap((result) => result.warnings.map((warning) => warning.rule));
+      assert.deepEqual(rules, ["kk-forge/custom-media-feature-name-disallowed-list"], css);
+    }
+    // A disable comment with its reason silences the plugin as it does a built-in rule.
+    assert.deepEqual(
+      await reportedOn(
+        "/* stylelint-disable-next-line kk-forge/custom-media-feature-name-disallowed-list -- a popover follows the window */\n@custom-media --narrow (max-width: 600px);\n",
+      ),
+      [],
+      "disabled @custom-media",
+    );
+    assert.deepEqual(
+      await reportedOn("@custom-media --hover (hover: hover);\n"),
+      [],
+      "@custom-media (hover: hover)",
+    );
     for (const allowed of [
       "border-radius: 50%",
       "font-size: smaller",
@@ -164,6 +211,15 @@ await suite("presets", async () => {
       "color: transparent",
       "color: color-mix(in oklab, var(--a), transparent)",
       "font-size: 0",
+      "font-weight: var(--fw, var(--fw-strong))",
+      "line-height: var(--lh-body, var(--lh-ui))",
+      "container-name: tan",
+      "animation: navy 1s",
+      "grid-area: red",
+      "view-transition-name: navy",
+      "content: counter(red)",
+      "grid-row-start: navy",
+      "font-weight: var(--fw,var(--fw-strong))",
     ]) {
       assert.deepEqual(await reportedOn(`.panel {\n  ${allowed};\n}\n`), [], allowed);
     }
