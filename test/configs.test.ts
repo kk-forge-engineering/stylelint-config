@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, suite, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import stylelint from "stylelint";
+import stylelint, { type LinterOptions } from "stylelint";
 
 // The test packs the package and unpacks it into a consumer's node_modules.
 // The presets then resolve through the package's `exports` and `files`, as
@@ -35,13 +35,16 @@ symlinkSync(
 process.chdir(consumer);
 
 /**
- * Returns the sorted rules that the presets report on the fixture, each once.
+ * Returns the sorted rules that the presets report on the source, each once.
  * A parse error or an invalid option counts by its message text.
  */
-async function reportedRules(presets: string[], fixture: string): Promise<string[]> {
+async function reported(
+  presets: string[],
+  source: Pick<LinterOptions, "files" | "code" | "codeFilename">,
+): Promise<string[]> {
   const { results } = await stylelint.lint({
     config: { extends: presets.map((preset) => `@kk-forge/stylelint-config/${preset}`) },
-    files: fileURLToPath(new URL(`fixtures/${fixture}`, import.meta.url)),
+    ...source,
   });
   const rules = results.flatMap((result) => [
     ...result.warnings.map((warning) => warning.rule),
@@ -50,6 +53,14 @@ async function reportedRules(presets: string[], fixture: string): Promise<string
   ]);
   return [...new Set(rules)].toSorted((left, right) => left.localeCompare(right));
 }
+
+/** Returns the rules that the presets report on a fixture under `test/fixtures`. */
+const reportedRules = (presets: string[], fixture: string): Promise<string[]> =>
+  reported(presets, { files: fileURLToPath(new URL(`fixtures/${fixture}`, import.meta.url)) });
+
+/** Returns the rules that base and tokens report on CSS linted as a component file, not the tokens file. */
+const reportedOn = (code: string): Promise<string[]> =>
+  reported(["base", "tokens"], { code, codeFilename: join(consumer, "src", "panel.css") });
 
 await suite("presets", async () => {
   after(() => rmSync(consumer, { recursive: true, force: true }));
@@ -64,7 +75,7 @@ await suite("presets", async () => {
     );
     assert.deepEqual(await reportedRules(["base", "tailwind"], "tailwind/clean.css"), []);
     assert.deepEqual(await reportedRules(["base", "tokens"], "tokens/clean.css"), []);
-    // The tokens file sets the values, so the rules that ask for tokens skip it.
+    // The tokens file sets the values, the fonts of @font-face among them, so the rules that ask for tokens skip it.
     assert.deepEqual(await reportedRules(["base", "tokens"], "tokens/tokens.css"), []);
   });
 
@@ -101,10 +112,61 @@ await suite("presets", async () => {
     ]);
   });
 
+  // The broken fixture lists each rule once, so one option of a rule could stop reporting while another keeps the rule
+  // in the list. Each banned value is linted on its own and must be reported by its rule.
+  await test("tokens reports each banned value by its rule", async () => {
+    const banned: Record<string, string> = {
+      "font-size: 13px": "declaration-property-unit-allowed-list",
+      "font-size: 10pt": "declaration-property-unit-allowed-list",
+      "font-size: 1.2rem": "declaration-property-unit-allowed-list",
+      "border-radius: 4px": "declaration-property-unit-allowed-list",
+      "border-radius: 1em": "declaration-property-unit-allowed-list",
+      "font-weight: 600": "declaration-property-value-allowed-list",
+      "line-height: 1.4": "declaration-property-value-allowed-list",
+      "line-height: 20px": "declaration-property-value-allowed-list",
+      "font: 600 14px/20px var(--sans)": "declaration-property-value-allowed-list",
+      "color: #fff": "color-no-hex",
+      "color: white": "color-named",
+      "color: rgba(0 0 0 / 50%)": "function-disallowed-list",
+      "color: hsl(0deg 0% 0%)": "function-disallowed-list",
+      "color: oklch(70% 0.1 200deg)": "function-disallowed-list",
+      "color: rgb(0 0 0)": "function-disallowed-list",
+      "color: hsla(0deg 0% 0% / 50%)": "function-disallowed-list",
+      "color: hwb(0deg 0% 0%)": "function-disallowed-list",
+      "color: lab(50% 0 0)": "function-disallowed-list",
+      "color: lch(50% 0 0deg)": "function-disallowed-list",
+      "color: oklab(50% 0 0)": "function-disallowed-list",
+      "color: color(display-p3 1 0 0)": "function-disallowed-list",
+    };
+    for (const [declaration, rule] of Object.entries(banned)) {
+      // base may report the same value by its own rule too, such as rgba() as an alias of rgb().
+      assert.ok((await reportedOn(`.panel {\n  ${declaration};\n}\n`)).includes(rule), declaration);
+    }
+    for (const media of [
+      "(prefers-color-scheme: dark)",
+      "(min-width: 600px)",
+      "(max-width: 600px)",
+      "(width <= 600px)",
+    ]) {
+      const css = `@media ${media} {\n  .panel {\n    color: var(--text);\n  }\n}\n`;
+      assert.ok((await reportedOn(css)).includes("media-feature-name-disallowed-list"), media);
+    }
+    for (const allowed of [
+      "border-radius: 50%",
+      "font-size: smaller",
+      "color: currentcolor",
+      "color: transparent",
+      "color: color-mix(in oklab, var(--a), transparent)",
+      "font-size: 0",
+    ]) {
+      assert.deepEqual(await reportedOn(`.panel {\n  ${allowed};\n}\n`), [], allowed);
+    }
+  });
+
   await test("tokens reports a number where a token belongs, a second palette and a layout by the window", async () => {
     assert.deepEqual(await reportedRules(["base", "tokens"], "tokens/broken.css"), [
       "color-no-hex",
-      "declaration-property-unit-disallowed-list",
+      "declaration-property-unit-allowed-list",
       "declaration-property-value-allowed-list",
       "function-disallowed-list",
       "media-feature-name-disallowed-list",
