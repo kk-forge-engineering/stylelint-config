@@ -1,0 +1,7 @@
+:root {
+  --fs-base: 14px;
+  --fw-strong: 600;
+  --radius: 10px;
+  --text: light-dark(#111, #eee);
+  --shadow: rgb(0 0 0 / 10%);
+}

@@ -1,0 +1,22 @@
+.panel {
+  font: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-strong);
+  line-height: var(--lh-body);
+  color: var(--text);
+  background: light-dark(var(--paper), var(--ink));
+  border-radius: var(--radius);
+}
+
+/* stylelint-disable-next-line media-feature-name-disallowed-list -- a popover follows the window, not its container */
+@media (width <= 560px) {
+  .panel {
+    line-height: 1;
+  }
+}
+
+@container (max-width: 600px) {
+  .panel {
+    border-radius: 0;
+  }
+}

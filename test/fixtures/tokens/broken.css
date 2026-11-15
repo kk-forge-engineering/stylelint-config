@@ -1,0 +1,12 @@
+.panel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: rgb(0 0 0);
+}
+
+@media (prefers-color-scheme: dark) {
+  .panel {
+    border-radius: 4px;
+  }
+}

@@ -63,6 +63,9 @@ await suite("presets", async () => {
       [],
     );
     assert.deepEqual(await reportedRules(["base", "tailwind"], "tailwind/clean.css"), []);
+    assert.deepEqual(await reportedRules(["base", "tokens"], "tokens/clean.css"), []);
+    // The tokens file sets the values, so the rules that ask for tokens skip it.
+    assert.deepEqual(await reportedRules(["base", "tokens"], "tokens/tokens.css"), []);
   });
 
   await test("base reports each broken rule and each disable comment it refuses", async () => {
@@ -95,6 +98,16 @@ await suite("presets", async () => {
       "at-rule-no-unknown",
       "custom-property-pattern",
       "import-notation",
+    ]);
+  });
+
+  await test("tokens reports a number where a token belongs, a second palette and a layout by the window", async () => {
+    assert.deepEqual(await reportedRules(["base", "tokens"], "tokens/broken.css"), [
+      "color-no-hex",
+      "declaration-property-unit-disallowed-list",
+      "declaration-property-value-allowed-list",
+      "function-disallowed-list",
+      "media-feature-name-disallowed-list",
     ]);
   });
 });
