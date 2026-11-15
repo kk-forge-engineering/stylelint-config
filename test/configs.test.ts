@@ -150,6 +150,12 @@ await suite("presets", async () => {
     ]) {
       const css = `@media ${media} {\n  .panel {\n    color: var(--text);\n  }\n}\n`;
       assert.ok((await reportedOn(css)).includes("media-feature-name-disallowed-list"), media);
+      // The tokens file is exempt from the value rules only: a second palette would be written exactly there.
+      const inTokens = await reported(["base", "tokens"], {
+        code: css,
+        codeFilename: join(consumer, "src", "tokens.css"),
+      });
+      assert.ok(inTokens.includes("media-feature-name-disallowed-list"), `${media} in tokens.css`);
     }
     for (const allowed of [
       "border-radius: 50%",

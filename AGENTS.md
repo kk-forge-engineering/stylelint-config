@@ -1,6 +1,6 @@
 # stylelint-config
 
 - `base.js` turns off only the layout rules, because oxfmt lays the CSS out. It also lets a custom property keep the case of its keywords. Every other rule of stylelint-config-standard stays on.
-- `tokens.js` asks for a token where a value would otherwise be written out. It skips the file named `tokens.css` that sets them, `@font-face` included; a values file under another name gets the same override in the consumer's config.
+- `tokens.js` asks for a token where a value would otherwise be written out. The value rules skip the file named `tokens.css` that sets them, `@font-face` included, while the `@media` ban still holds there; a values file under another name gets the same override in the consumer's config.
 - `css-modules.js` and `tailwind.js` allow syntax their tool understands. `tailwind.js` also sets `import-notation` to strings, because Tailwind builds no utilities from an `@import url(...)`.
 - A preset change adds a line to a fixture under `test/fixtures`. A clean fixture must report no finding, and a broken fixture must report exactly the rules `test/configs.test.ts` lists. oxfmt formats every fixture, and `mise run check` runs the test.

@@ -1,5 +1,5 @@
 /** @type {import("stylelint").Config["rules"]} */
-const rules = {
+const valueRules = {
   // A font size or radius takes no unit at all, so no unit is left to slip past a list. A radius keeps `%`: `50%` is a
   // shape (a circle), not a size. A pill's fully round edge is a token too, such as `--radius-full: 999px`.
   "declaration-property-unit-allowed-list": {
@@ -27,7 +27,6 @@ const rules = {
     "oklch",
     "color",
   ],
-  "media-feature-name-disallowed-list": ["prefers-color-scheme", "width", "min-width", "max-width"],
 };
 
 /**
@@ -37,14 +36,23 @@ const rules = {
  * @type {import("stylelint").Config}
  */
 export default {
-  rules,
+  rules: {
+    ...valueRules,
+    // The tokens file is held to this one too: a second palette would be written exactly there.
+    "media-feature-name-disallowed-list": [
+      "prefers-color-scheme",
+      "width",
+      "min-width",
+      "max-width",
+    ],
+  },
   overrides: [
     {
       // The file named `tokens.css` sets the tokens, so it is the one file where their values are written out.
       // `@font-face` goes there too: its `font-weight` is the weight range of the font file and takes no `var()`.
       // A consumer whose values file has another name gives that file the same override in its own config.
       files: ["**/tokens.css"],
-      rules: Object.fromEntries(Object.keys(rules).map((rule) => [rule, null])),
+      rules: Object.fromEntries(Object.keys(valueRules).map((rule) => [rule, null])),
     },
   ],
 };
