@@ -1,6 +1,6 @@
 {
   "name": "@kk-forge/stylelint-config",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "The stylelint rules KK Forge's CSS lints with",
   "license": "MIT",
   "author": "KK Forge",
@@ -11,12 +11,15 @@
   "files": [
     "base.js",
     "css-modules.js",
+    "custom-media.js",
+    "tokens.js",
     "tailwind.js"
   ],
   "type": "module",
   "exports": {
     "./base": "./base.js",
     "./css-modules": "./css-modules.js",
+    "./tokens": "./tokens.js",
     "./tailwind": "./tailwind.js"
   },
   "publishConfig": {
