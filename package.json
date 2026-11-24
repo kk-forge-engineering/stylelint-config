@@ -39,7 +39,7 @@
     "stylelint-config-standard": "^41.0.0"
   },
   "devDependencies": {
-    "@kk-forge/oxlint-config": "^14.0.0",
+    "@kk-forge/oxlint-config": "^15.0.0",
     "@types/node": "^26.6.6",
     "oxfmt": "^0.78.0",
     "oxlint": "^1.93.0",
